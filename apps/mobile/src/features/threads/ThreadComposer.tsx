@@ -101,6 +101,7 @@ import {
   ComposerDictationToolbar,
 } from "../voice-input/ComposerDictationControl";
 import { useVoiceInputController } from "../voice-input/useVoiceInputController";
+import { useDeepgramTranscriber } from "../voice-input/useDeepgramTranscriber";
 import { resolveVoiceComposerPresentation } from "../voice-input/voiceInputPresentation";
 import {
   type ExistingThreadSettingsRouteSession,
@@ -398,9 +399,11 @@ export const ThreadComposer = memo(function ThreadComposer(props: ThreadComposer
     onUsageLimits:
       usageLimitsOffered && props.draftAttachments.length === 0 ? openUsageLimits : undefined,
   });
+  const cloudTranscriber = useDeepgramTranscriber(props.environmentId);
   const voiceInput = useVoiceInputController({
     ownerKey: composerOwnerKey,
     draftMessage: props.draftMessage,
+    cloudTranscriber,
     selection: composerMenu.selection,
     onChangeDraftMessage: props.onChangeDraftMessage,
     onChangeSelection: composerMenu.onSelectionChange,

@@ -23,6 +23,7 @@ import {
   voiceInputFreezesEditor,
   type VoiceDraftSnapshot,
   type VoiceInputState,
+  type VoiceTranscriber,
 } from "@t3tools/client-runtime/voice-input";
 import { normalizeVoiceInputDecibels, VOICE_WAVEFORM_SAMPLE_COUNT } from "./voiceInputMetering";
 
@@ -67,6 +68,8 @@ export function useVoiceInputController(input: {
   readonly draftMessage: string;
   readonly selection: ComposerEditorSelection;
   readonly disabled?: boolean;
+  /** T3-Snow: the environment's Deepgram dictation, used where on-device transcription is not. */
+  readonly cloudTranscriber?: VoiceTranscriber | null;
   readonly onChangeDraftMessage: (value: string) => void;
   readonly onChangeSelection: (selection: ComposerEditorSelection) => void;
 }) {
@@ -103,7 +106,8 @@ export function useVoiceInputController(input: {
   if (!controllerRef.current) {
     controllerRef.current = new VoiceInputController({
       recorder,
-      getTranscriber: getLocalVoiceTranscriber,
+      getTranscriber: () =>
+        getLocalVoiceTranscriber() ?? latestInputRef.current.cloudTranscriber ?? null,
       requestPermission: async () => {
         const permission = await requestRecordingPermissionsAsync();
         return { granted: permission.granted, canAskAgain: permission.canAskAgain };
@@ -221,7 +225,10 @@ export function useVoiceInputController(input: {
   return {
     // Store screenshots show the dictation button even on simulators, whose
     // on-device transcription is unavailable.
-    isAvailable: getLocalVoiceTranscriber() !== null || getNativeShowcaseScene() !== null,
+    isAvailable:
+      getLocalVoiceTranscriber() !== null ||
+      Boolean(input.cloudTranscriber) ||
+      getNativeShowcaseScene() !== null,
     state,
     audioLevels,
     elapsedSeconds,

@@ -75,6 +75,7 @@ import {
   ComposerDictationToolbar,
 } from "../voice-input/ComposerDictationControl";
 import { useVoiceInputController } from "../voice-input/useVoiceInputController";
+import { useDeepgramTranscriber } from "../voice-input/useDeepgramTranscriber";
 import { resolveVoiceComposerPresentation } from "../voice-input/voiceInputPresentation";
 import {
   useThreadSettingsSheetPresentation,
@@ -470,8 +471,10 @@ export function NewTaskDraftScreen(props: {
     onChangeDraftMessage: flow.setPrompt,
     onUpdateInteractionMode: flow.planModeEnabled ? flow.setInteractionMode : undefined,
   });
+  const cloudTranscriber = useDeepgramTranscriber(selectedProject?.environmentId ?? null);
   const voiceInput = useVoiceInputController({
     ownerKey: flow.draftKey,
+    cloudTranscriber,
     draftMessage: flow.prompt,
     selection: composerMenu.selection,
     disabled: isIncomingShareTransferPending || isImportingShare || flow.submitting,
