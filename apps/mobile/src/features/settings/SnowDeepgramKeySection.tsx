@@ -49,6 +49,10 @@ export function SnowDeepgramKeySection(props: {
       return;
     }
     setKeySet(result.value.deepgramKeySet);
+    if (result.value.message) {
+      Alert.alert("Couldn't save the key", result.value.message);
+      return;
+    }
     setDraft("");
   };
 

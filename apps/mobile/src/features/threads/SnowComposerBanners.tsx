@@ -190,7 +190,7 @@ function AutopilotBanner({
       <BannerHeader
         icon="bolt.circle"
         title={paused ? "Autopilot paused" : "Autopilot"}
-        detail={`${paused ? "T3 Code restarted. " : ""}${autopilot.goal}`}
+        detail={autopilot.goal}
       >
         {paused ? (
           <BannerButton
