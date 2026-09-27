@@ -18,6 +18,7 @@ import { ConnectionEnvironmentRow } from "../connection/ConnectionEnvironmentRow
 import { SettingsActionRow } from "./components/SettingsActionRow";
 import { SettingsScreen } from "./components/SettingsScreen";
 import { SettingsSection } from "./components/SettingsSection";
+import { SnowDeepgramKeySection } from "./SnowDeepgramKeySection";
 import {
   canMaintainEnvironment,
   canUpdateEnvironmentProvider,
@@ -331,6 +332,7 @@ function EnvironmentDetail({ environmentId }: { readonly environmentId: Environm
                       </View>
                     ))}
                 </SettingsSection>
+                <SnowDeepgramKeySection environmentId={environmentId} disabled={!allowed} />
               </>
             ) : null}
           </>

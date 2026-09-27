@@ -117,6 +117,20 @@ const STREAMING_CHOICES: ReadonlyArray<{
   },
 ];
 
+const COUNCIL_ROUND_CHOICES: ReadonlyArray<{
+  readonly rounds: number;
+  readonly label: string;
+  readonly description: string;
+}> = [
+  { rounds: 1, label: "Opening only", description: "Each member answers once; the chair decides." },
+  {
+    rounds: 2,
+    label: "Opening and debate",
+    description: "Members answer, then respond to each other.",
+  },
+  { rounds: 3, label: "Two debate rounds", description: "The slowest and most thorough." },
+];
+
 export function SettingsEnvironmentNewThreadsRouteScreen() {
   return <ServerSettingsDetail page="new-threads" />;
 }
@@ -204,6 +218,15 @@ function ServerSettingsDetail(props: { readonly page: SettingsPage }) {
   );
   const disabled =
     pendingWrites > 0 || !hasConnectedSelection || (projectSelected && !supportsProjectOverrides);
+  // T3-Snow Council defaults. Seat models stay in the desktop app's settings.
+  const supportsCouncil = targets.every(
+    (target) => target.environment.serverConfig.environment.capabilities.council === true,
+  );
+  const councilValue = <K extends "rounds" | "web">(key: K): ServerSettings["council"][K] | null =>
+    reference !== null &&
+    displayTargets.every((entry) => entry.settings.council[key] === reference.settings.council[key])
+      ? reference.settings.council[key]
+      : null;
   const supportsContinuation = targets.every(
     (target) =>
       target.environment.serverConfig.environment.capabilities.threadRestartContinuation === true,
@@ -396,6 +419,36 @@ function ServerSettingsDetail(props: { readonly page: SettingsPage }) {
                       onValueChange={(value) => write({ enableAgentBrowserAccess: value })}
                     />
                   </SettingsSection>
+                  {supportsCouncil ? (
+                    <SettingsSection
+                      title="Council"
+                      trailing={
+                        pendingWrites === 0 && councilValue("rounds") === null ? (
+                          <MixedValuesLabel projectSelected={projectSelected} />
+                        ) : null
+                      }
+                    >
+                      {COUNCIL_ROUND_CHOICES.map((choice, index) => (
+                        <ChoiceRow
+                          key={choice.rounds}
+                          label={choice.label}
+                          description={choice.description}
+                          selected={councilValue("rounds") === choice.rounds}
+                          separated={index > 0}
+                          disabled={disabledFor("council")}
+                          onPress={() => write({ council: { rounds: choice.rounds } })}
+                        />
+                      ))}
+                      <FanoutSwitchRow
+                        icon="magnifyingglass"
+                        label="Web research"
+                        subtitle="Let members search the web for facts that would change the verdict. Your idea text is sent to the search provider."
+                        value={councilValue("web")}
+                        disabled={disabledFor("council")}
+                        onValueChange={(value) => write({ council: { web: value } })}
+                      />
+                    </SettingsSection>
+                  ) : null}
                 </>
               ) : null}
 
