@@ -109,10 +109,18 @@ function resolveAppVariant(value: string | undefined): AppVariant {
   }
 }
 
+// T3-Snow: a fork builds under its own Expo project, bundle ids and Apple
+// team (see the `snow` profile in eas.json). Unset, T3 Code's identity is used.
+const SNOW_BUNDLE_ID_PREFIX = repoEnv.SNOW_BUNDLE_ID_PREFIX?.trim() || null;
+const EAS_PROJECT_ID =
+  repoEnv.SNOW_EAS_PROJECT_ID?.trim() || "d763fcb8-d37c-41ea-a773-b54a0ab4a454";
+const snowId = (id: string) =>
+  SNOW_BUNDLE_ID_PREFIX ? id.replace(/^com\.t3tools\.t3code/, SNOW_BUNDLE_ID_PREFIX) : id;
+
 const variant = VARIANT_CONFIG[APP_VARIANT];
 const iosBundleIdentifier = isIosPersonalTeamBuild
   ? personalTeamBundleIdentifier!
-  : variant.iosBundleIdentifier;
+  : snowId(variant.iosBundleIdentifier);
 
 const dmSansFonts = {
   regular: "@expo-google-fonts/dm-sans/400Regular/DMSans_400Regular.ttf",
@@ -210,7 +218,7 @@ const sharingPlugin: NonNullable<ExpoConfig["plugins"]>[number] = [
 // family names without waiting for runtime font loading.
 
 const config: ExpoConfig = {
-  name: variant.appName,
+  name: SNOW_BUNDLE_ID_PREFIX ? variant.appName.replace("T3 Code", "T3 Snow") : variant.appName,
   slug: "t3-code",
   platforms: ["ios", "android"],
   scheme: variant.scheme,
@@ -226,7 +234,7 @@ const config: ExpoConfig = {
   userInterfaceStyle: "automatic",
   updates: {
     enabled: repoEnv.T3CODE_MOBILE_UPDATES_ENABLED !== "0",
-    url: "https://u.expo.dev/d763fcb8-d37c-41ea-a773-b54a0ab4a454",
+    url: `https://u.expo.dev/${EAS_PROJECT_ID}`,
     checkAutomatically: "ON_LOAD",
     fallbackToCacheTimeout: 0,
   },
@@ -240,13 +248,18 @@ const config: ExpoConfig = {
     // Pin code signing to the T3 Tools team so non-interactive `expo run:ios`
     // does not fall back to a personal team (which cannot sign app groups,
     // Sign in with Apple, or push notification entitlements).
-    appleTeamId: "ARK85ZXQ4Z",
-    associatedDomains: [
-      `applinks:${variant.relyingParty}`,
-      `webcredentials:${variant.relyingParty}`,
-    ],
+    appleTeamId: repoEnv.SNOW_APPLE_TEAM_ID?.trim() || "ARK85ZXQ4Z",
+    // T3-Snow: forks have no Clerk domain vouching for their app.
+    ...(SNOW_BUNDLE_ID_PREFIX
+      ? {}
+      : {
+          associatedDomains: [
+            `applinks:${variant.relyingParty}`,
+            `webcredentials:${variant.relyingParty}`,
+          ],
+        }),
     entitlements: {
-      "keychain-access-groups": [`$(AppIdentifierPrefix)${variant.iosBundleIdentifier}`],
+      "keychain-access-groups": [`$(AppIdentifierPrefix)${snowId(variant.iosBundleIdentifier)}`],
     },
     infoPlist: {
       NSAppTransportSecurity: {
@@ -275,7 +288,7 @@ const config: ExpoConfig = {
   },
   android: {
     icon: variant.assets.appIcon,
-    package: variant.androidPackage,
+    package: snowId(variant.androidPackage),
     ...(repoEnv.T3CODE_ANDROID_GOOGLE_SERVICES_FILE
       ? { googleServicesFile: repoEnv.T3CODE_ANDROID_GOOGLE_SERVICES_FILE }
       : {}),
@@ -455,10 +468,10 @@ const config: ExpoConfig = {
       tracesToken: repoEnv.EXPO_PUBLIC_OTLP_TRACES_TOKEN ?? null,
     },
     eas: {
-      projectId: "d763fcb8-d37c-41ea-a773-b54a0ab4a454",
+      projectId: EAS_PROJECT_ID,
     },
   },
-  owner: "pingdotgg",
+  owner: repoEnv.SNOW_EXPO_OWNER?.trim() || "pingdotgg",
 };
 
 export default config;

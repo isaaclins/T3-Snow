@@ -57,6 +57,22 @@
       "channel": "production",
       "environment": "production",
       "autoIncrement": true
+    },
+    "snow": {
+      "extends": "production",
+      "distribution": "store",
+      "channel": "snow",
+      "env": {
+        "APP_VARIANT": "production",
+        "NODE_OPTIONS": "--max-old-space-size=4096",
+        "SNOW_BUNDLE_ID_PREFIX": "com.isaaclins.t3snow",
+        "SNOW_EXPO_OWNER": "",
+        "SNOW_EAS_PROJECT_ID": "",
+        "SNOW_APPLE_TEAM_ID": ""
+      },
+      "android": {
+        "buildType": "apk"
+      }
     }
   },
   "submit": {
@@ -74,6 +90,7 @@
       "android": {
         "track": "internal"
       }
-    }
+    },
+    "snow": {}
   }
 }

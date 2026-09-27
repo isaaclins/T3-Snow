@@ -15,6 +15,11 @@ A fork of [T3 Code](https://github.com/pingdotgg/t3code) with local voice dictat
   is done and verified, answering its own questions, then turns itself off.
 - **Council:** send `/council <idea>` and four advisors (on any mix of Claude and GPT
   models) debate it; a chair gives the verdict.
+- **Mobile:** the phone app shows wake-ups, Autopilot and Council above the
+  composer, takes `/autopilot` and `/council`, opens subagents from their card
+  to read, stop, or message them, and offers System chat in New Task. Where the
+  phone can't transcribe on its own (Android, older iPhones) dictation uses the
+  machine's Deepgram key, set in the environment's settings page.
 - **System chat:** press `Ctrl+Shift+U` (or pick **System chat** in the command
   palette) to ask about your computer without choosing a project.
 
@@ -23,6 +28,12 @@ A fork of [T3 Code](https://github.com/pingdotgg/t3code) with local voice dictat
 - **Ship a release:** Actions → **Release** → Run workflow. It builds Windows and
   Linux and publishes a GitHub release. The version is automatic (`1.<run>.0`),
   or push a tag like `v1.2.0`.
+- **Ship the mobile app:** Actions → **Mobile release** → Run workflow. Android
+  builds an APK (download it from the linked EAS build page); iOS builds and goes
+  to TestFlight. One-time setup: an [Expo](https://expo.dev) account, `eas init`
+  in `apps/mobile`, the owner and project id in the `snow` profile of
+  `apps/mobile/eas.json`, and an `EXPO_TOKEN` repository secret. iOS also needs
+  an Apple Developer account; put its team id in the same profile.
 - **Get upstream updates:** Actions → **Sync upstream** → Run workflow
   and opens a pull request merging the latest official T3 Code. It needs a
   repository secret named `SYNC_TOKEN`: a personal access token with the `repo`

@@ -48,7 +48,7 @@ jobs:
         run: vp run typecheck
 
       - name: Test
-        run: vp run --filter @t3tools/contracts --filter @t3tools/shared --filter @t3tools/client-runtime --filter @t3tools/web test
+        run: vp run --filter @t3tools/contracts --filter @t3tools/shared --filter @t3tools/client-runtime --filter @t3tools/web --filter @t3tools/mobile test
 
       - name: Build desktop pipeline
         run: vp run build:desktop
