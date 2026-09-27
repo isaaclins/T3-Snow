@@ -23,6 +23,7 @@ import { useWorkspaceState } from "../../state/workspace";
 import { useAdaptiveWorkspaceLayout } from "../layout/AdaptiveWorkspaceLayout";
 import { useIncomingShare } from "../sharing/IncomingShareProvider";
 import { useNewTaskFlow } from "./new-task-flow-provider";
+import { SnowSystemChatRow } from "./SnowSystemChatRow";
 import { filterProjectScopes, getProjectScopeSelectionTarget } from "./new-task-project-selection";
 
 type NewTaskRouteParams = {
@@ -246,6 +247,9 @@ export function NewTaskRouteScreen({ route }: StaticScreenProps<NewTaskRoutePara
               : {}),
           }}
         >
+          {!incomingShare && searchText === "" ? (
+            <SnowSystemChatRow preferredEnvironmentId={selectedEnvironmentId} />
+          ) : null}
           {projectScopes.length === 0 ? (
             <View
               collapsable={false}
