@@ -91,6 +91,7 @@ import type { RemoteClientConnectionState } from "../../lib/connection";
 import { resolveProviderOptionDescriptors } from "../../lib/providerOptions";
 import { ComposerCommandPopover } from "./ComposerCommandPopover";
 import { useComposerCommandMenu } from "./use-composer-command-menu";
+import { useSnowSlashCommands } from "./snow-slash-commands";
 import {
   ComposerDictationCancelAction,
   ComposerDictationDraftContent,
@@ -368,6 +369,12 @@ export const ThreadComposer = memo(function ThreadComposer(props: ThreadComposer
     return report !== null;
   }, [currentModelSelection.instanceId, onShowUsageLimits, props.serverConfig]);
 
+  const snowCommands = useSnowSlashCommands({
+    environmentId: props.environmentId,
+    threadId: props.selectedThread.id,
+    queueCount: props.queueCount,
+  });
+
   const composerMenu = useComposerCommandMenu({
     draftMessage: props.draftMessage,
     ownerKey: composerOwnerKey,
@@ -386,6 +393,7 @@ export const ThreadComposer = memo(function ThreadComposer(props: ThreadComposer
         ? undefined
         : props.onUpdateInteractionMode,
     offersUsageLimits: usageLimitsOffered,
+    snowCommands: snowCommands.support,
     // With attachments aboard the pick just inserts the text, so it sends as a prompt.
     onUsageLimits:
       usageLimitsOffered && props.draftAttachments.length === 0 ? openUsageLimits : undefined,
@@ -484,6 +492,12 @@ export const ThreadComposer = memo(function ThreadComposer(props: ThreadComposer
       if (openUsageLimits()) onChangeDraftMessage("");
       return;
     }
+    if (
+      props.draftAttachments.length === 0 &&
+      (await snowCommands.handle(props.draftMessage, () => onChangeDraftMessage("")))
+    ) {
+      return;
+    }
     const threadKey = scopedThreadKey(props.environmentId, props.selectedThread.id);
     if (inFlightThreadIdsRef.current.has(threadKey)) return;
     inFlightThreadIdsRef.current.add(threadKey);
@@ -510,6 +524,7 @@ export const ThreadComposer = memo(function ThreadComposer(props: ThreadComposer
     onChangeDraftMessage,
     openUsageLimits,
     usageLimitsOffered,
+    snowCommands,
     onSendMessage,
     props.environmentId,
     props.environmentLabel,

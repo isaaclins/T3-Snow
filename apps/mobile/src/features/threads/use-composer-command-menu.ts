@@ -42,6 +42,7 @@ import { useAtomCommand } from "../../state/use-atom-command";
 import { useComposerPathSearch, useComposerPullRequestSearch } from "../../state/queries";
 import type { ComposerCommandItem } from "./ComposerCommandPopover";
 import { matchesSlashSkillQuery } from "./composerSlashSkillSearch";
+import { type SnowCommandSupport, snowSlashCommandItems } from "./snow-slash-commands.logic";
 
 const WORKSPACE_SNAPSHOT_RETRY_COOLDOWN_MS = 10_000;
 
@@ -56,6 +57,8 @@ export function buildComposerSlashCommandItems(input: {
   readonly hasCompactableConversation?: boolean;
   /** Whether T3 itself offers /usage-limits for the selected provider. */
   readonly offersUsageLimits?: boolean;
+  /** T3-Snow commands the environment supports; thread composer only. */
+  readonly snowCommands?: SnowCommandSupport;
   readonly allowInteractionMode: boolean;
   readonly selectedProviderStatus: Pick<
     ServerProvider,
@@ -95,6 +98,7 @@ export function buildComposerSlashCommandItems(input: {
   // Providers expand commands only at the start of a message. T3 commands
   // change local state and do not have this restriction.
   if (!input.atMessageStart) return items;
+  if (input.snowCommands) items.push(...snowSlashCommandItems(query, input.snowCommands));
   for (const command of input.selectedProviderStatus?.slashCommands ?? []) {
     if (!command.name.toLowerCase().includes(query)) continue;
     if (command.name === "compact" && !input.hasCompactableConversation) continue;
@@ -171,6 +175,7 @@ export function useComposerCommandMenu({
   hasThread,
   hasCompactableConversation,
   offersUsageLimits = false,
+  snowCommands,
   enabled = true,
   onChangeDraftMessage,
   onUpdateInteractionMode,
@@ -187,6 +192,7 @@ export function useComposerCommandMenu({
   readonly hasCompactableConversation: boolean;
   /** Whether T3 itself offers /usage-limits for the selected provider. */
   readonly offersUsageLimits?: boolean;
+  readonly snowCommands?: SnowCommandSupport;
   readonly enabled?: boolean;
   readonly onChangeDraftMessage: (value: string) => void;
   readonly onUpdateInteractionMode?: (mode: ProviderInteractionMode) => void;
@@ -338,6 +344,7 @@ export function useComposerCommandMenu({
         hasThread,
         hasCompactableConversation,
         offersUsageLimits,
+        ...(snowCommands ? { snowCommands } : {}),
         allowInteractionMode: onUpdateInteractionMode !== undefined,
         selectedProviderStatus: selectedProviderStatus
           ? {
@@ -472,6 +479,7 @@ export function useComposerCommandMenu({
     skills,
     trigger,
     offersUsageLimits,
+    snowCommands,
   ]);
 
   const onSelect = useCallback(

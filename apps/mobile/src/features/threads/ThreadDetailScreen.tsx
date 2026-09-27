@@ -90,6 +90,7 @@ import { PendingApprovalCard } from "./PendingApprovalCard";
 import { ComposerFeedback } from "./ComposerFeedback";
 import { ComposerUsageLimits } from "./ComposerUsageLimits";
 import { PendingUserInputCard } from "./PendingUserInputCard";
+import { SnowComposerBanners } from "./SnowComposerBanners";
 import { ThreadCreationFailedCard } from "./ThreadCreationFailedCard";
 import {
   FLOATING_WORKING_CONTROL_COVERAGE,
@@ -1003,6 +1004,12 @@ export const ThreadDetailScreen = memo(function ThreadDetailScreen(props: Thread
                       onClose={dismissUsageLimits}
                     />
                   </Animated.View>
+                ) : null}
+                {activeUserInputRequestId === null ? (
+                  <SnowComposerBanners
+                    environmentId={props.environmentId}
+                    threadId={props.selectedThread.id}
+                  />
                 ) : null}
                 {props.creationState?.kind === "failed" ? (
                   <Animated.View
