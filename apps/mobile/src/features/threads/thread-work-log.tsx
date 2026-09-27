@@ -38,6 +38,7 @@ import { toolActivityFaviconUrl } from "@t3tools/shared/favicon";
 import { AppText as Text } from "../../components/AppText";
 import { T3Wordmark } from "../../components/T3Wordmark";
 import { cn } from "../../lib/cn";
+import { SnowAgentLink } from "./SnowAgentLink";
 import { THREAD_WORK_ROW_MIN_HEIGHT, type deriveThreadWorkLogSizing } from "../../lib/layout";
 import {
   type AgentSpawnSummary,
@@ -1099,7 +1100,12 @@ export const ThreadAgentSpawnCard = memo(function ThreadAgentSpawnCard(props: {
             className="ml-8 mt-1.5 gap-1.5 border-l border-border pl-3"
           >
             {summary.members.map((member) => (
-              <View key={member.title} className="gap-px">
+              <SnowAgentLink
+                key={member.taskId}
+                taskId={member.taskId}
+                title={member.title}
+                live={member.tone === "working"}
+              >
                 <View className="flex-row items-center gap-1.5">
                   <View
                     className={cn(
@@ -1121,7 +1127,7 @@ export const ThreadAgentSpawnCard = memo(function ThreadAgentSpawnCard(props: {
                     {member.detail}
                   </Text>
                 ) : null}
-              </View>
+              </SnowAgentLink>
             ))}
           </Animated.View>
         ) : null}

@@ -218,6 +218,8 @@ export interface AgentSpawnSummary {
   readonly status: string;
   readonly tone: "working" | "completed" | "failed" | "stopped";
   readonly members: ReadonlyArray<{
+    /** The subagent's task id, for T3-Snow's agent controls. */
+    readonly taskId: string;
     readonly title: string;
     readonly status: string;
     readonly tone: "working" | "completed" | "failed" | "stopped";
@@ -1102,7 +1104,10 @@ export function agentSpawnLabel(spawn: NonNullable<WorkLogEntry["agentSpawn"]>):
 
 /** Workflow coordinators sit in their own batch but are not a member. */
 function agentSpawnMembers(spawn: NonNullable<WorkLogEntry["agentSpawn"]>) {
-  return spawn.agents.filter((_, index) => spawn.agentTaskIds[index] !== spawn.workflowId);
+  return spawn.agents.flatMap((agent, index) => {
+    const taskId = spawn.agentTaskIds[index];
+    return taskId === undefined || taskId === spawn.workflowId ? [] : [{ ...agent, taskId }];
+  });
 }
 
 function agentSpawnTone(status: WorkLogToolLifecycleStatus | undefined): AgentSpawnSummary["tone"] {
@@ -1133,6 +1138,7 @@ export function agentSpawnSummary(
   const members = agentSpawnMembers(spawn).map((agent) => {
     const tone = agentSpawnTone(agent.status);
     return {
+      taskId: agent.taskId,
       title: agent.title,
       status: tone === "working" ? "working" : (agent.status ?? tone),
       tone,
